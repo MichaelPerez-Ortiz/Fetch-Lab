@@ -21,6 +21,33 @@ axios.defaults.baseURL = "https://api.thecatapi.com/v1";
 axios.defaults.headers.common = ["x-api-key"] = API_KEY;
 
 
+axios.interceptors.request.use(config => {
+  config.metadata = { startTime: new Date() };
+  console.log("Request started");
+   progressBar.style.width = "0%"; 
+  document.body.style.cursor = "progress"; 
+  return config
+});
+
+// Add response interceptor to log request duration  
+axios.interceptors.response.use(response => {
+  let duration = new Date() - response.config.metadata.startTime;
+  console.log(`Request completed in ${duration}ms`);
+  document.body.style.cursor = "default"; 
+  progressBar.style.width = "100%"; 
+  return response;
+});
+
+function updateProgress(progressEvent) {
+    console.log(progressEvent);
+    if (progressEvent.lengthComputable) {
+        let percentage = (progressEvent.loaded / progressEvent.total) * 100;
+        progressBar.style.width = percentage + "%";
+    }
+}
+
+
+
 //Step1
 
 async function initialLoad() {
@@ -54,8 +81,14 @@ clear();
 
   // let breedId = breedSelect.value;
   const [{ data: jsonData2 }, { data: jsonData3 }] = await Promise.all([
-    axios.get(`/images/search?breed_id=${breedId}&limit=10`),
-    axios.get(`/breeds/${breedId}`)
+    axios.get(`/images/search?breed_id=${breedId}&limit=10` , {
+      onDownloadProgress: updateProgress
+    }),
+
+    axios.get(`/breeds/${breedId}` , {
+      onDownloadProgress: updateProgress
+    })
+
   ]);
 
   console.log(jsonData2);
