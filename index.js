@@ -2,7 +2,7 @@ const { Carousel } = bootstrap
 
 import { createCarouselItem, clear, appendCarousel, start } from "./Carousel.js";
 
-import axios from "axios";
+// import axios from "axios";
 
 
 // The breed selection input element.
@@ -14,42 +14,38 @@ const progressBar = document.getElementById("progressBar");
 // The get favourites button element.
 const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 
+const body = document.querySelector("body");
+
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "";
+const API_KEY = "live_OfrnPMrz5r1qAxkzGQFHLBgEQ6TnaVMXSvZ4vuUMuGUQu0o47kVfLHroPPwhhY0M";
 
-axios.defaults.baseURL = "https://api.thecatapi.com/v1";
-axios.defaults.headers.common = ["x-api-key"] = API_KEY;
+axios.defaults.headers['x-api-key'] = API_KEY;
+axios.defaults.baseURL = 'https://api.thecatapi.com/v1'
+axios.defaults.onDownloadProgress = updateProgress
 
 
-
-//Step7
+//Steps 5 , 6 and 7
 
 axios.interceptors.request.use(config => {
-  config.metadata = { startTime: new Date() };
+  config.metadata = config.metadata || {};
+  config.metadata.startTime =  new Date();
   console.log("Request started");
-   progressBar.style.width = "0%"; 
-  document.body.style.cursor = "progress"; 
-  return config
+  progressBar.style.width = "0%"; 
+  body.style.cursor = "progress"; 
+  return config;
 });
 
 
 axios.interceptors.response.use(response => {
-  let duration = new Date() - response.config.metadata.startTime;
-  console.log(`Request completed in ${duration}ms`);
-  document.body.style.cursor = "default"; 
-  progressBar.style.width = "100%"; 
+  console.log(`Request completed in ${new Date() - response.config.metadata.startTime}ms`);
+  body.style.cursor = "default"; 
+ 
   return response;
 });
 
 
-//Step6
-
 function updateProgress(progressEvent) {
-    console.log(progressEvent);
-    if (progressEvent.lengthComputable) {
-        let percentage = (progressEvent.loaded / progressEvent.total) * 100;
-        progressBar.style.width = percentage + "%";
-    }
+    progressBar.style.width = `${100}%`;
 }
 
 
