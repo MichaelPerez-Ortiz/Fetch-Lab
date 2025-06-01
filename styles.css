@@ -77,3 +77,11 @@ body {
     height: 17em;
   }
 }
+
+.no-image-center {
+  display: flex;          /* Use flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: center;    /* Center vertically */
+  height: 100%;           /* Ensure the item takes full height */
+  text-align: center;     /* Center the text itself */
+}
