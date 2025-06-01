@@ -2,7 +2,8 @@ const { Carousel } = bootstrap
 
 import { createCarouselItem, clear, appendCarousel, start } from "./Carousel.js";
 
-// import axios from "axios";
+import axios from "axios";
+
 
 // The breed selection input element.
 const breedSelect = document.getElementById("breedSelect");
@@ -16,20 +17,15 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 // Step 0: Store your API key here for reference and easy access.
 const API_KEY = "";
 
-/**
- * 1. Create an async function "initialLoad" that does the following:
- * - Retrieve a list of breeds from the cat API using fetch().
- * - Create new <options> for each of these breeds, and append them to breedSelect.
- *  - Each option should have a value attribute equal to the id of the breed.
- *  - Each option should display text equal to the name of the breed.
- * This function should execute immediately.
- */
+axios.defaults.baseURL = "https://api.thecatapi.com/v1";
+axios.defaults.headers.common = ["x-api-key"] = API_KEY;
+
 
 //Step1
 
 async function initialLoad() {
-  let catBreeds = await fetch ("https://api.thecatapi.com/v1/breeds");
-  let jsonData = await catBreeds.json();
+  let { data: jsonData} = await axios.get("/breeds");
+
   console.log(jsonData)
   
 
@@ -44,20 +40,7 @@ await breeds(breedSelect.value);
 
 }
 
-/**
- * 2. Create an event handler for breedSelect that does the following:
- * - Retrieve information on the selected breed from the cat API using fetch().
- *  - Make sure your request is receiving multiple array items!
- *  - Check the API documentation if you're only getting a single object.
- * - For each object in the response array, create a new element for the carousel.
- *  - Append each of these new elements to the carousel.
- * - Use the other data you have been given to create an informational section within the infoDump element.
- *  - Be creative with how you create DOM elements and HTML.
- *  - Feel free to edit index.html and styles.css to suit your needs, but be careful!
- *  - Remember that functionality comes first, but user experience and design are important.
- * - Each new selection should clear, re-populate, and restart the Carousel.
- * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
- */
+
 
 //Step2
 
@@ -70,19 +53,17 @@ async function breeds(breedId) {
 clear();
 
   // let breedId = breedSelect.value;
-  let catPics = await fetch (`https://api.thecatapi.com/v1/images/search?breed_id=${breedId}&limit=10`);
-  let jsonData2 = await catPics.json();
+  const [{ data: jsonData2 }, { data: jsonData3 }] = await Promise.all([
+    axios.get(`/images/search?breed_id=${breedId}&limit=10`),
+    axios.get(`/breeds/${breedId}`)
+  ]);
+
   console.log(jsonData2);
-  
-
-
-  let breedInfo = await fetch(`https://api.thecatapi.com/v1/breeds/${breedId}`);
-  let jsonData3 = await breedInfo.json();
   console.log(jsonData3);
+
   
-   
 jsonData2.forEach(image => {
-  let carouselItem = createCarouselItem(
+  let carouselItem = createCarouselItem (
     image.url ,
     jsonData3.name ,
     image.id
@@ -114,26 +95,6 @@ function updateInfo(breedInfo) {
       </div>
   `;
 }
-
-
-/**
- * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
- */
-/**
- * 4. Change all of your fetch() functions to axios!
- * - axios has already been imported for you within index.js.
- * - If you've done everything correctly up to this point, this should be simple.
- * - If it is not simple, take a moment to re-evaluate your original code.
- * - Hint: Axios has the ability to set default headers. Use this to your advantage
- *   by setting a default header with your API key so that you do not have to
- *   send it manually with all of your requests! You can also set a default base URL!
- */
-/**
- * 5. Add axios interceptors to log the time between request and response to the console.
- * - Hint: you already have access to code that does this!
- * - Add a console.log statement to indicate when requests begin.
- * - As an added challenge, try to do this on your own without referencing the lesson material.
- */
 
 /**
  * 6. Next, we'll create a progress bar to indicate the request is in progress.
@@ -188,7 +149,7 @@ export async function favourite(imgId) {
  * - Test other breeds as well. Not every breed has the same data available, so
  *   your code should account for this.
  */
-// Favorite functionality
+
 
 // Initialize the app
 initialLoad();
