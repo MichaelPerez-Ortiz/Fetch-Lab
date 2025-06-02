@@ -1,7 +1,7 @@
 const { Carousel } = bootstrap
 import { favourite } from "./index.js";
 
-export function createCarouselItem(imgSrc, imgAlt, imgId) {
+export function createCarouselItem(imgSrc, imgAlt, imgId , isFavorite = false) {
   const template = document.querySelector("#carouselItemTemplate");
   const clone = template.content.firstElementChild.cloneNode(true);
 
@@ -10,6 +10,20 @@ export function createCarouselItem(imgSrc, imgAlt, imgId) {
   img.alt = imgAlt;
 
   const favBtn = clone.querySelector(".favourite-button");
+  favBtn.dataset.imgId = imgId;
+
+if ( !isFavorite) {
+  axios.get("/favourites").then(response => {
+    let favorites = response.data;
+    if (favorites.some( fav => fav.image_id === imgId)) {
+          favBtn.classList.add("favorited");
+    }
+  });
+
+} else {
+    favBtn.classList.add("favorited");
+}
+
   favBtn.addEventListener("click", () => {
     favourite(imgId);
   });

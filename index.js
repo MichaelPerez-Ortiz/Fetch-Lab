@@ -108,12 +108,15 @@ clear();
     infoDump.parentNode.insertBefore(noImage, infoDump);
 
   } else {
+
+    let { data: favorites} = await axios.get("/favourites");
    
 jsonData2.forEach(image => {
   let carouselItem = createCarouselItem(
     image.url ,
     jsonData3.name ,
-    image.id
+    image.id ,
+    favorites.some(fav => fav.image_id === image.id)
   );
   appendCarousel(carouselItem);
 });
@@ -166,9 +169,13 @@ export async function favourite(imgId) {
     let favorites = favImages.data;
     let favorited = favorites.find(fav => fav.image_id === imgId);
 
+     const heartButton = document.querySelector(`[data-img-id="${imgId}"]`);
+
   if (favorited) {
     await axios.delete(`/favourites/${favorited.id}`);
     console.log("Removed from favorites");
+
+    heartButton.classList.remove("favorited")
 
   } else {
     
@@ -176,14 +183,28 @@ export async function favourite(imgId) {
         image_id: imgId
     });
       console.log("Added to favorites");
+
+     heartButton.classList.add("favorited")
+
   }
 }
 
 //Step9
 
+breedSelect.addEventListener("click", function() {
+    if (infoDump.innerHTML === '') {  
+        breeds(this.value); 
+    }
+});
+
+
 getFavouritesBtn.addEventListener("click", getFavorites);
 
+
+
   async function getFavorites() {
+
+    infoDump.innerHTML = "";
     
     let favData = await axios.get("/favourites");
     let favr = favData.data;
