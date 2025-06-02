@@ -17,14 +17,14 @@ const getFavouritesBtn = document.getElementById("getFavouritesBtn");
 const body = document.querySelector("body");
 
 // Step 0: Store your API key here for reference and easy access.
-const API_KEY = "live_OfrnPMrz5r1qAxkzGQFHLBgEQ6TnaVMXSvZ4vuUMuGUQu0o47kVfLHroPPwhhY0M";
+const API_KEY = "";
 
-axios.defaults.headers['x-api-key'] = API_KEY;
-axios.defaults.baseURL = 'https://api.thecatapi.com/v1'
+axios.defaults.headers["x-api-key"] = API_KEY;
+axios.defaults.baseURL = "https://api.thecatapi.com/v1"
 axios.defaults.onDownloadProgress = updateProgress
 
 
-//Steps 5 , 6 and 7
+//Steps 5 ,6 and 7
 
 axios.interceptors.request.use(config => {
   config.metadata = config.metadata || {};
@@ -154,59 +154,60 @@ if (!breedInfo) {
   `;
 }
 
+
+
+
 //Step8
 
 
 export async function favourite(imgId) {
-  
-  let { data: favImages } = await axios.get("/favourites");
-  let favorited = favImages.find(fav => fav.imageId === imgId);
+ 
+    let favImages = await axios.get("/favourites");
+    let favorites = favImages.data;
+    let favorited = favorites.find(fav => fav.image_id === imgId);
 
-  if(favorited) {
-    await axios.delete( `/favourites/${favorited.id}`);
-      console.log("Removed");
+  if (favorited) {
+    await axios.delete(`/favourites/${favorited.id}`);
+    console.log("Removed from favorites");
+
   } else {
-    await axios.post("/favourites" , {
-      imageId: imgId
+    
+      await axios.post("/favourites", {
+        image_id: imgId
     });
-    console.log("Added");
+      console.log("Added to favorites");
   }
-
-
-
-
 }
-
-
-getFavouritesBtn.addEventListener("click" , getFavourites);
 
 //Step9
 
-async function getFavourites() {
-  let { data: favData } = await axios.get("/favourites");
+getFavouritesBtn.addEventListener("click", getFavorites);
 
-  let favImages = await Promise.all (
-    favData.map(async fav => {
-      let { data: imageData } = await axios.get(`/images/${fav.imageId}`);
-        return imageData
-    })
-  );
-
-  favImages.forEach(image => {
-    let breedName = image.breeds && image.breeds[0] ? image.breeds[0].name: "Unkown Breed";
-    let carouselItem = createCarouselItem (
-      image.url , 
-      breedName , 
-      image.id
+  async function getFavorites() {
+    
+    let favData = await axios.get("/favourites");
+    let favr = favData.data;
+      
+      clear();
+      
+      
+    let favs = await Promise.all(
+      favr.map(async fav => {
+        let imageResponse = await axios.get(`/images/${fav.image_id}`);
+        return imageResponse.data;
+      })
     );
-    appendCarousel(carouselItem);
-  });
-  
-  start();
 
+      favs.forEach(image => {
+        let carouselItem = createCarouselItem(
+          image.url,
+          "Favorite Cat",
+          image.id
+      );
+        appendCarousel(carouselItem);
+    });
 
-
-
+      start();
 }
 
 
